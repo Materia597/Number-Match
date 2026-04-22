@@ -1,6 +1,7 @@
 const scoreDisplay = document.getElementById('score')
 const board = document.getElementById('game-board')
 const duplicateButton = document.getElementById('duplicate-button')
+const levelCounter = document.getElementById('level-counter')
 
 // Game Variables
 
@@ -38,6 +39,8 @@ const startGame = (width = 9) => {
     board.innerHTML = ""
     duplicationsLeft = maxDuplications
     level++;
+    levelCounter.innerText = `Level: ${level}`
+    duplicateButton.innerText = `+(${duplicationsLeft})`
 
     for (let i = 0; i < initialNumberQuantity; i++) {
         boardNumbers.push( Math.floor(Math.random() * 9) + 1 );
@@ -80,8 +83,7 @@ const cellClickEvent = (event) => {
     console.log(selected)
 
     if (boardNumbers.length === 0) {
-        score += 200
-        scoreDisplay.innerText = score
+        addScore(200 * level)
         startGame()
 
     }
@@ -108,11 +110,17 @@ duplicateButton.addEventListener('click', () => {
     }
 
     duplicationsLeft--;
+    duplicateButton.innerText = `+(${duplicationsLeft})`
 })
+
+const addScore = (amount) => {
+    score += amount
+    scoreDisplay.innerText = score;
+}
 
 const checkSelections = () => {
 
-    // can be mathced
+    // can be mathced ?
     let firstNumber = Number(selected.firstSelection.dataset.value)
     let secondNumber = Number(selected.secondSelection.dataset.value)
     if (firstNumber + secondNumber !== 10 && firstNumber !== secondNumber) {
@@ -134,7 +142,7 @@ const checkSelections = () => {
     let secondRow = Math.floor(secondSelectionIndex / boardWidth)
 
 
-    // are they in the same diagonal
+    // are they in the same diagonal?
     if ( shareDiagonal(firstColumn, firstRow, secondColumn, secondRow) ) {
         diagonalCellCheck({firstSelectionIndex, firstColumn, firstRow}, {secondSelectionIndex, secondColumn, secondRow})
         return
@@ -182,7 +190,10 @@ const diagonalCellCheck = ({firstSelectionIndex, firstColumn, firstRow}, {second
         smallerColumn++
     }
 
-    if (clear) matched({firstSelectionIndex, firstRow}, {secondSelectionIndex, secondRow})
+    if (clear) {
+        matched({firstSelectionIndex, firstRow}, {secondSelectionIndex, secondRow})
+        addScore(15 * level)
+    }
 }
 
 const columnCellCheck = ({firstSelectionIndex, firstRow}, {secondSelectionIndex, secondRow}) => {
@@ -194,7 +205,10 @@ const columnCellCheck = ({firstSelectionIndex, firstRow}, {secondSelectionIndex,
         if (boardNumbers[i] !== -1) clear = false
     }
 
-    if (clear) matched({firstSelectionIndex, firstRow}, {secondSelectionIndex, secondRow})
+    if (clear) {
+        matched({firstSelectionIndex, firstRow}, {secondSelectionIndex, secondRow})
+        addScore(5 * level)
+    }
 }
 
 const horizontalCellCheck = ({firstSelectionIndex, firstRow}, {secondSelectionIndex, secondRow}) => {
@@ -206,7 +220,10 @@ const horizontalCellCheck = ({firstSelectionIndex, firstRow}, {secondSelectionIn
         if (boardNumbers[i] !== -1) clear = false;
     }
 
-    if (clear) matched({firstSelectionIndex, firstRow}, {secondSelectionIndex, secondRow})
+    if (clear) {
+        matched({firstSelectionIndex, firstRow}, {secondSelectionIndex, secondRow})
+        addScore(2 * level)
+    }
    
 }
 
@@ -247,6 +264,7 @@ const attemptClearRow = (row) => {
         board.childNodes.item(rowIndex)?.remove()
     }
     boardNumbers.splice(rowIndex, boardWidth)
+    addScore(10 * level)
 
     return true;
 }
