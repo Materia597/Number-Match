@@ -17,10 +17,13 @@ h1 {
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center;
+    align-content: center;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 1000px;
 }
 
 #game-board {
-    align-self: stretch;
     display: grid;
     margin: 16px;
     justify-content: center;
@@ -32,6 +35,7 @@ h1 {
 
     gap: 0;
 
+    width: 100%;
     max-width: 800px;
     text-align: center;
     max-height: 600px;
