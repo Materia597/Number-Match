@@ -1,0 +1,50 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 20px;
+}
+
+#game-board {
+    display: grid;
+    gap: 0;
+    margin: 16px;
+    border: 1px gray solid;
+    justify-content: center;
+    align-content: baseline;
+
+    grid-auto-flow: row;
+    grid-template-rows: auto;
+    grid-template-columns: repeat(9, 1fr)
+}
+
+.number-cell {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    border: 1px gray solid;
+    background: white;
+    transition: background 100ms;
+}
+
+.number-cell[data-active="true"]:hover {
+    background: rgb(176, 199, 254);
+    border: 1px black solid;
+}
+
+.number-cell[data-selected="true"] {
+    background: rgb(112, 153, 251);
+    border: 1px black solid;
+}
+
+
+.number-cell[data-active="true"] {
+    cursor: pointer;
+}
+
+.number-cell[data-active="false"] {
+    background: rgb(216, 216, 216);
+}
