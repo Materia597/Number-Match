@@ -19,6 +19,10 @@ let selected = {
 const maxDuplications = 5
 let duplicationsLeft = maxDuplications
 
+/**
+ * Helper function that clears the `selected` object and updates the cells
+ * currently selected
+ */
 const clearSelected = () => {
     if (selected.firstSelection) selected.firstSelection.dataset.selected = "false"
     if (selected.secondSelection) selected.secondSelection.dataset.selected = "false"
@@ -28,7 +32,12 @@ const clearSelected = () => {
 }
 
 
-const startGame = (width = 9) => {
+/**
+ * Resets the board for a round of the game
+ * 
+ * @param {number} width The number of cells in each row of the game board 
+ */
+const resetBoard = (width = 9) => {
     boardWidth = width
     const initialNumberQuantity = Math.floor(Math.random() * width) + 3 * width
     const rows = Math.ceil( initialNumberQuantity / width)
@@ -62,6 +71,10 @@ const startGame = (width = 9) => {
 }
 
 /**
+ * Helper function that should be passed into an event listener.
+ * Updates the `selected` object in occordance with which cells are selected
+ * and, if two unique are selected, to initiate a cell check to try
+ * and match them.
  * 
  * @param {Event} event 
  */
@@ -84,7 +97,7 @@ const cellClickEvent = (event) => {
 
     if (boardNumbers.length === 0) {
         addScore(200 * level)
-        startGame()
+        resetBoard()
 
     }
 }
@@ -113,14 +126,26 @@ duplicateButton.addEventListener('click', () => {
     duplicateButton.innerText = `+(${duplicationsLeft})`
 })
 
+
+/**
+ * Adds to the game score
+ * 
+ * @param {number} amount The amount to add to the score
+ */
 const addScore = (amount) => {
     score += amount
     scoreDisplay.innerText = score;
 }
 
+/**
+ * Responsible for checking whether the two calls selected by `selected`
+ * can be matched together
+ * 
+ * @returns {void}
+ */
 const checkSelections = () => {
 
-    // can be mathced ?
+    // can the numbers of the cells be matched?
     let firstNumber = Number(selected.firstSelection.dataset.value)
     let secondNumber = Number(selected.secondSelection.dataset.value)
     if (firstNumber + secondNumber !== 10 && firstNumber !== secondNumber) {
@@ -163,7 +188,14 @@ const checkSelections = () => {
     clearSelected()
 }
 
-
+/**
+ * Checks whether the two cells passed to it have no occupied/active cells
+ * between them. This function assumes that the two cells are in a valid
+ * diagonal to one another.
+ * 
+ * @param {{ firstSelectionIndex: number, firstColumn: number, firstRow: number}} firstSelectionParameters 
+ * @param {{ secondSelectionIndex: number, secondColumn: number, secondRow: number}} secondSelectionParameters
+ */
 const diagonalCellCheck = ({firstSelectionIndex, firstColumn, firstRow}, {secondSelectionIndex, secondColumn, secondRow}) => {
     let smallerRow = Math.min(firstRow, secondRow)
     let largerRow = Math.max(firstRow, secondRow)
@@ -196,6 +228,13 @@ const diagonalCellCheck = ({firstSelectionIndex, firstColumn, firstRow}, {second
     }
 }
 
+/**
+ * Checks whether the two cells pass to this function have no active cells
+ * between them. Assumes that the two cells are in the came column.
+ * 
+ * @param {{ firstSelectionIndex: number, firstRow: number}} firstSelectionParameters 
+ * @param {{ secondSelectionIndex: number, secondRow: number}} secondSelectionParameters
+ */
 const columnCellCheck = ({firstSelectionIndex, firstRow}, {secondSelectionIndex, secondRow}) => {
     let smallerIndex = Math.min(firstSelectionIndex, secondSelectionIndex)
     let largerIndex = Math.max(firstSelectionIndex, secondSelectionIndex)
@@ -211,6 +250,13 @@ const columnCellCheck = ({firstSelectionIndex, firstRow}, {secondSelectionIndex,
     }
 }
 
+/**
+ * Checks whether the two cells passed to this function have no active cells between
+ * them. The two cells do not have to be on the same row.
+ * 
+ * @param {{ firstSelectionIndex: number, firstRow: number}} firstSelectionParameters 
+ * @param {{ secondSelectionIndex: number, secondRow: number}} secondSelectionParameters
+ */
 const horizontalCellCheck = ({firstSelectionIndex, firstRow}, {secondSelectionIndex, secondRow}) => {
     let smallerIndex = Math.min(firstSelectionIndex, secondSelectionIndex)
     let largerIndex = Math.max(firstSelectionIndex, secondSelectionIndex)
@@ -228,6 +274,14 @@ const horizontalCellCheck = ({firstSelectionIndex, firstRow}, {secondSelectionIn
 }
 
 
+/**
+ * When two cells are successfully matched together: deactivates the cells that were 
+ * matched, removes them from the backend array, resets `selected`, and checks to see
+ * if any rows need to be cleared from the board.
+ * 
+ * @param {{ firstSelectionIndex: number, firstRow: number}} firstSelectionParameters 
+ * @param {{ secondSelectionIndex: number, secondRow: number}} secondSelectionParameters
+ */
 const matched = ({firstSelectionIndex, firstRow}, {secondSelectionIndex, secondRow}) => {
     boardNumbers[firstSelectionIndex] = -1
     boardNumbers[secondSelectionIndex] = -1
@@ -247,6 +301,13 @@ const matched = ({firstSelectionIndex, firstRow}, {secondSelectionIndex, secondR
 }
 
 
+/**
+ * Checks whether a row is entirely empty and should be cleared from the board.
+ * If yes, then it clears that row.
+ * 
+ * @param {number} row The row number to attempt to clear
+ * @returns {boolean} Whether the row was cleared
+ */
 const attemptClearRow = (row) => {
     const rowIndex = boardWidth * row;
     let willClear = true;
@@ -264,6 +325,7 @@ const attemptClearRow = (row) => {
         board.childNodes.item(rowIndex)?.remove()
     }
     boardNumbers.splice(rowIndex, boardWidth)
+    
     addScore(10 * level)
 
     return true;
@@ -285,6 +347,7 @@ const shareDiagonal = (x1, y1, x2, y2) => {
     let yDifference = Math.abs(y1 - y2)
 
     // could they theoretically be diagonal ?
+    // the distance on the X and Y axis must be the same for a valid diagonal
     if (xDifference !== yDifference) return false;
     
     let smallerX = Math.min(x1, x2)
@@ -295,6 +358,8 @@ const shareDiagonal = (x1, y1, x2, y2) => {
     
     const boardHeight = Math.floor(boardNumbers.length / boardWidth)
 
+    // makes sure that the diagonal check doesn't wrap around to the other side
+    // of the board
     while (smallerX <= boardWidth && smallerY <= boardHeight) {
         if (smallerX === largerX && smallerY === largerY) {
             return true;
@@ -325,4 +390,4 @@ const cellInMinimumCorner = (x1, y1, x2, y2) => {
     return (xDifference < 0 && yDifference < 0) || (xDifference > 0 && yDifference > 0)
 }
 
-startGame()
+resetBoard()
